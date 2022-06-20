@@ -1,0 +1,58 @@
+---
+title: "Data Practical 8"
+author: "Stefano Politi"
+date: "(`r format(Sys.time(), '%d %B %Y')`)"
+output:
+  github_document:
+    toc: TRUE
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, echo = TRUE)
+```
+
+Required packages:
+
+```{r packages}
+library(tidyr)
+library(knitr)
+library(dslabs)
+library(ggplot2)
+```
+
+## Importing Data
+
+The [cars](https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/cars) dataset shows the speed of the cars and distances taken to stop (note that the data were recorded in the 1920).
+
+```{r cars}
+data("cars")
+kable(head(cars))
+```
+
+The dataset is composed of 50 observations for 2 variables:
+* Explanatory variable: speed (numeric: quantitative, continuous).
+* Response variable: dist (numeric: quantitative, continuous).
+
+```{r cars_structure}
+str(cars)
+```
+## Linear model
+
+There is a high correlation between the 2 variables (r = 0.8) and the p-value is significant (p = 0.01).
+
+```{r model}
+cor.test(cars$speed, cars$dist)
+model<-lm( dist ~speed, data= cars)
+summary(model)
+```
+
+## Plot
+
+The plot clearly shows an increase in the distance to stop as the speed increases.
+
+```{r plot}
+ggplot(cars, aes(speed, dist)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
