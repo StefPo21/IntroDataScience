@@ -1,0 +1,51 @@
+---
+title: "Writing Scientific Reports"
+author: "Stefano Politi"
+date: "(`r format(Sys.time(), '%d %B %Y')`)"
+output:
+  github_document:
+    toc: true
+bibliography: 'references.bib'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Creating a bullet list
+
+**Un-ordered bullet list**:
+
+* Item 1
+  + *Sub-item 1.1*
+  + *Sub-item 1.2*
+* Item 2
+  + *Sub-item 2.1*
+  + *Sub-item 2.2*
+  
+**Ordered list**:
+
+1. Item 1
+  a. *Sub-item 1.1*
+  b. *Sub-item 1.2*
+2. Item 2
+  a. *Sub-item 2.1*
+  b. *Sub-item 2.2*
+  
+Note: the sub-items for the ordered list are not working for some reason...
+  
+## Inserting a picture
+
+![](RStudio_icon.png)
+
+## Adding R code blocks
+
+```{r code_block}
+library(knitr)
+library(dslabs)
+data("stars")
+kable(head(stars))
+```
+
+## References
