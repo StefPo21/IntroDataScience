@@ -1,0 +1,135 @@
+---
+title: "Data Practical 7"
+author: "Stefano Politi"
+date: "(`r format(Sys.time(), '%d %B %Y')`)"
+output:
+  github_document:
+    toc: TRUE
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, echo = TRUE)
+```
+
+Required packages:
+
+```{r packages}
+library(readxl)
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+## Importing Data
+
+The following dataset is described [here](https://github.com/StefPo21/IntroDataScience/tree/main/3_data/2_Data.md#Importing-External-Data) (Dataset 2).
+
+```{r GEMMES}
+GEMMES <- read_xlsx("Exp2A-GEMMES_Binomial.xlsx", sheet = 1)
+```
+
+The dataset contains multiple copies for each participant. For the purpose of this practice, the duplicates will be removed.
+
+```{r GEMMES_clean}
+GEMMES_clean <- GEMMES %>%
+  select(-VISU, -VISU_Value, -VISU_Binomial)
+GEMMES_clean <- unique(GEMMES_clean)
+```
+
+The dataset contains many variables. For the purpose of this practice, only a subset will be selected.
+
+```{r GEMMES_selection}
+GEMMES2 <- GEMMES_clean %>%
+  select(Participant_ID, Sex, Age, Musician_type, Excerpt_id, Excerpt_GEMS, BEST_GEMS, BEST_VA, BEST_VISU)
+kable(head(GEMMES2))
+```
+
+## Hypothesis
+
+Musical expertise and sex should not influence the relationship between the participant ratings for musical metaphors (GEMMES) and musical emotions (GEMS).
+
+## Filtering Data
+
+There are no participants classified as musician type 1 (no musical experience).
+Type 2 corresponds to non musicians, with a minimum of musical experience.
+Type 3 corresponds to musicians, with at least 5 years of regular instrument practice.s
+
+```{r musician types}
+GEMMES2_types <- GEMMES2 %>%
+  count(Musician_type)
+kable(GEMMES2_types)
+GEMMES2_type2 <- GEMMES2 %>%
+  filter(Musician_type == 2)
+GEMMES2_table2 <- GEMMES2_type2 %>%
+  count(var=GEMMES2_type2$BEST_GEMS, wt_var = GEMMES2_type2$BEST_VISU)
+kable(GEMMES2_table2)
+GEMMES2_type3 <- GEMMES2 %>%
+  filter(Musician_type == 3)
+GEMMES2_table3 <- GEMMES2_type3 %>%
+  count(var=GEMMES2_type3$BEST_GEMS, wt_var = GEMMES2_type3$BEST_VISU)
+kable(GEMMES2_table3)
+```
+
+```{r sex}
+GEMMES2_sexes <- GEMMES2 %>%
+  count(Sex)
+kable(GEMMES2_sexes)
+GEMMES2_M <- GEMMES2 %>%
+  filter(Sex == "M")
+GEMMES2_tableM <- GEMMES2_M %>%
+  count(var=GEMMES2_M$BEST_GEMS, wt_var = GEMMES2_M$BEST_VISU)
+kable(GEMMES2_tableM)
+GEMMES2_F <- GEMMES2 %>%
+  filter(Sex == "F")
+GEMMES2_tableF <- GEMMES2_F %>%
+  count(var=GEMMES2_F$BEST_GEMS, wt_var = GEMMES2_F$BEST_VISU)
+kable(GEMMES2_tableF)
+```
+
+## Plotting Data
+
+The grouped bar-plots for both musician types seem identical.
+
+```{r plot_type}
+ggplot(GEMMES2_table2, aes(x=var, y=n, fill = wt_var))+
+  geom_bar(position='dodge', stat='identity')+
+  theme(axis.text.x = element_text(size = 7))+
+  scale_x_discrete(labels = c("Joyful Activation", "Nostalgia", "Peacefulness", "Power", "Sadness", "Tenderness", "Tension"))+
+  labs(title = "Frequency of GEMMES ratings for each GEMS ratings (non-musicians)", x="GEMS (ratings)", y="Frequency", fill = "GEMMES (ratings)")+
+  scale_fill_discrete(labels = c("Flow", "Force", "Interior", "Movement"))
+
+ggplot(GEMMES2_table3, aes(x=var, y=n, fill = wt_var))+
+  geom_bar(position='dodge', stat='identity')+
+  theme(axis.text.x = element_text(size = 7))+
+  scale_x_discrete(labels = c("Joyful Activation", "Nostalgia", "Peacefulness", "Power", "Sadness", "Tenderness", "Tension"))+
+  labs(title = "Frequency of GEMMES ratings for each GEMS ratings (musicians)", x="GEMS (ratings)", y="Frequency", fill = "GEMMES (ratings)")+
+  scale_fill_discrete(labels = c("Flow", "Force", "Interior", "Movement"))
+```
+
+The grouped bar-plots for both sexes seem identical.
+
+```{r plot_sex}
+ggplot(GEMMES2_tableM, aes(x=var, y=n, fill = wt_var))+
+  geom_bar(position='dodge', stat='identity')+
+  theme(axis.text.x = element_text(size = 7))+
+  scale_x_discrete(labels = c("Joyful Activation", "Nostalgia", "Peacefulness", "Power", "Sadness", "Tenderness", "Tension"))+
+  labs(title = "Frequency of GEMMES ratings for each GEMS ratings (males)", x="GEMS (ratings)", y="Frequency", fill = "GEMMES (ratings)")+
+  scale_fill_discrete(labels = c("Flow", "Force", "Interior", "Movement"))
+
+ggplot(GEMMES2_tableF, aes(x=var, y=n, fill = wt_var))+
+  geom_bar(position='dodge', stat='identity')+
+  theme(axis.text.x = element_text(size = 7))+
+  scale_x_discrete(labels = c("Joyful Activation", "Nostalgia", "Peacefulness", "Power", "Sadness", "Tenderness", "Tension"))+
+  labs(title = "Frequency of GEMMES ratings for each GEMS ratings (females)", x="GEMS (ratings)", y="Frequency", fill = "GEMMES (ratings)")+
+  scale_fill_discrete(labels = c("Flow", "Force", "Interior", "Movement"))
+```
+
+## Analysing Data
+
+Proportion test could be useful to analyse the data, however I did not manage to properly do such tests...
+
+## References
+
+Schaerlaeken, S., Glowinski, D., & Grandjean, D. (2022). Linking musical metaphors and emotions evoked by the sound of classical music. *Psychology of music*, 50(1), 245-264.
