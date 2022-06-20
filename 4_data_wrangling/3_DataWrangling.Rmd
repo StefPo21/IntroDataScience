@@ -1,0 +1,127 @@
+---
+title: "Data Practical 3"
+author: "Stefano Politi"
+date: "(`r format(Sys.time(), '%d %B %Y')`)"
+output:
+  github_document:
+    toc: TRUE
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, echo = TRUE)
+```
+
+```{r packages}
+library(dslabs)
+library(readxl)
+library(knitr)
+library(dplyr)
+```
+## External Data
+
+### Importing Data
+
+The following dataset is described [here](https://github.com/StefPo21/IntroDataScience/tree/main/3_data/2_Data.md#Importing-External-Data) (Dataset 2).
+
+```{r GEMMES}
+GEMMES <- read_xlsx("Exp2A-GEMMES_Binomial.xlsx", sheet = 1)
+```
+
+### Filtering Data
+
+The dataset contains multiple copies for each participant. For the purpose of this practice, the duplicates will be removed.
+
+```{r GEMMES_clean}
+GEMMES_clean <- GEMMES %>%
+  select(-VISU, -VISU_Value, -VISU_Binomial)
+GEMMES_clean <- unique(GEMMES_clean)
+kable(head(GEMMES_clean, 10))
+```
+
+Here the focus will be exclusively on the music excerpts associated to GEMS emotions of "Power" and "Tension" and on their respective highest participant ratings for GEMS, VA and GEMMES.
+
+```{r GEMMES_filter}
+GEMMES2 <- GEMMES_clean %>%
+  filter(Excerpt_GEMS %in% c("Power", "Tension")) %>%
+  select(Participant_ID, Excerpt_GEMS, BEST_GEMS, BEST_VA, BEST_VISU)
+kable(head(GEMMES2, 10))
+kable(tail(GEMMES2, 10))
+```
+
+### Structuring Data
+
+The structure of the filtered dataset shows 1 600 observation of 4 variables.
+
+The variables are listed here with their respective data types:
+
+* BEST_GEMS: character variable (qualitative, categorical) indicating the GEMS emotion with the highest rating for each participant.
+* BEST_VA: character variable (qualitative, categorical) indicating highest rating of either valence or arousal for each participant.
+* BEST_VISU: character variable (qualitative, categorical) indicating the GEMMES metaphor with the highest rating for each participant.
+
+```{r GEMMES_structure}
+str(GEMMES2)
+```
+
+When ordering the data by the GEMS emotion to which each music excerpt is associated, there seems to be a strong correlation with the participant's ratings.
+
+```{r GEMMES_ordered}
+GEMMES2 <- GEMMES2 %>%
+  arrange(Excerpt_GEMS)
+kable(head(GEMMES2, 20))
+kable(tail(GEMMES2, 20))
+```
+
+### Summarizing data
+
+To be able to verify this correlation, the data must be grouped and the occurrences of each rating counted.
+
+The results show indeed a strong correlations:
+
+* "Power" is 100% correlated with ratings of "Power", "Arousal" and "Force".
+* "Tension" is 100% correlated with ratings of "Tension", as well as:
+  + 50% correlated with ratings of "Arousal" and "Force.
+  + 50% correlated with ratings of "Valence" and "Movement".
+
+```{r GEMMES_counts}
+GEMMES3 <- GEMMES2 %>%
+  group_by(Excerpt_GEMS) %>%
+  count(BEST_GEMS, BEST_VA, BEST_VISU)
+kable(print(GEMMES3))
+```
+
+### Removing NAs
+
+There are no NA values are present in the filtered dataset.
+
+```{r GEMMES_NA}
+GEMMES4 <- na.omit(GEMMES2)
+str(GEMMES4)
+```
+
+## R Pre-loaded Data
+
+### Joining data
+
+The [results_us_election_2016](https://www.rdocumentation.org/packages/dslabs/versions/0.7.4/topics/polls_us_election_2016) dataset, from the dslabs package, describes the poll results of the US 2016 presidential elections.
+
+```{r us_elections}
+kable(head(results_us_election_2016))
+```
+
+The [murders](https://www.rdocumentation.org/packages/dslabs/versions/0.7.4/topics/murders) dataset, also from the dslabs package, describes gun murder data from FBI reports in the US, organized by state.
+
+```{r murders}
+kable(head(murders))
+```
+
+Joining the two datasets might be useful to investigate the relationship between the amount of gun murders in a state and the tendency of its citizens to vote for either Trump of Clinton.
+
+```{r joinData}
+joinedData <- full_join(results_us_election_2016, murders)
+kable(head(joinedData, 10))
+```
+
+## References
+
+Schaerlaeken, S., Glowinski, D., & Grandjean, D. (2022). Linking musical metaphors and emotions evoked by the sound of classical music. *Psychology of music*, 50(1), 245-264.
