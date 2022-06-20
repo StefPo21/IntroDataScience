@@ -52,8 +52,7 @@ The dataset includes information on the participants, on the classical music exc
 
 ```{r GEMMES}
 library(readxl)
-path  <- file.path("/home/itopie/Documents/Data Science/IntroDataScience/Data", "Exp2A-GEMMES_Binomial.xlsx")
-GEMMES <- read_xlsx(path, sheet = 1)
+GEMMES <- read_xlsx("Exp2A-GEMMES_Binomial.xlsx", sheet = 1)
 ```
 
 The structure of the dataset shows 7 200 observations of 100 variables.
@@ -92,8 +91,7 @@ The dataset contains all relevant participant information.
 
 
 ```{r participantData}
-path  <- file.path("/home/itopie/Documents/Data Science/IntroDataScience/Data", "Participant_data_E12_age.sex.MSI.csv")
-participantData <- read.csv(path)
+participantData <- read.csv("Participant_data_E12_age.sex.MSI.csv")
 ```
 
 The structure of the dataset shows 66 observations for 35 variables.
