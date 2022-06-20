@@ -1,0 +1,89 @@
+---
+title: "Data Practical 4"
+author: "Stefano Politi"
+date: "(`r format(Sys.time(), '%d %B %Y')`)"
+output:
+  github_document:
+    toc: TRUE
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, echo = TRUE)
+```
+
+Required packages:
+
+```{r packages}
+library(readxl)
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+## Importing Data
+
+The following dataset is described [here](https://github.com/StefPo21/IntroDataScience/tree/main/3_data/2_Data.md#Importing-External-Data) (Dataset 2).
+
+```{r GEMMES}
+GEMMES <- read_xlsx("Exp2A-GEMMES_Binomial.xlsx", sheet = 1)
+```
+
+The dataset contains multiple copies for each participant. For the purpose of this practice, the duplicates will be removed.
+
+```{r GEMMES_clean}
+GEMMES_clean <- GEMMES %>%
+  select(-VISU, -VISU_Value, -VISU_Binomial)
+GEMMES_clean <- unique(GEMMES_clean)
+```
+
+The dataset contains many variables. For the purpose of this practice, only a subset will be selected.
+
+```{r GEMMES_selection}
+GEMMES2 <- GEMMES_clean %>%
+  select(Sex, Age, Musician_type, Excerpt_id, Excerpt_GEMS, BEST_GEMS, BEST_VA, BEST_VISU)
+kable(head(GEMMES2, 10))
+```
+
+## Transforming Data
+
+Transforming the dataset from wide to long format:
+
+```{r GEMMES_transform}
+GEMMES2_long <- gather(GEMMES2, condition, measurement, BEST_GEMS:BEST_VISU)
+kable(head(GEMMES2_long, 10))
+```
+
+Uniting columns concerning participant information (sex, age and musician type):
+
+```{r GEMMES_unite}
+GEMMES2_long <- GEMMES2_long %>%
+  unite(Participant_info, Sex, Age, Musician_type)
+kable(head(GEMMES2_long, 10))
+```
+
+Reverting the previous operation, thus separating columns concerning participant information (sex, age and musician type):
+
+```{r GEMMES_separate}
+GEMMES2_long <- GEMMES2_long %>%
+    separate(Participant_info, into=c("Sex", "Age", "Musician_type"), sep ="_")
+kable(head(GEMMES2_long, 10))
+```
+
+## Plotting Data
+
+Plot of music excerpt ratings for musical emotions (x-axis) against musical mataphors (y-axis):
+
+```{r GEMS_GEMMES}
+ggplot(GEMMES2, aes(BEST_GEMS, BEST_VISU))+
+  geom_point()+
+  theme(axis.text.x = element_text(size = 7))+
+  labs(x = "Musical emotions (GEMS ratings)", y = "Musical metaphors (GEMMES ratings)")+
+  scale_y_discrete(labels = c("Flow", "Force", "Interior", "Movement"))+
+  scale_x_discrete(labels = c("JoyfulActivation", "Nostalgia", "Peacefulness", "Power", "Sadness", "Tenderness", "Tension"))
+```
+
+## References
+
+Schaerlaeken, S., Glowinski, D., & Grandjean, D. (2022). Linking musical metaphors and emotions evoked by the sound of classical music. *Psychology of music*, 50(1), 245-264.
